@@ -23,6 +23,10 @@ Download and enter the source code directory, then
 pip install .
 ```
 
+## Documentation
+
+The documentation is hosted on [Read the Docs](https://geoparticle-tutorial.readthedocs.io/en/latest/).
+
 ## Background
 
 Particles of specified geometries are typically created by the `lattice` command in LAMMPS, which can lead to rough surfaces when the particle spacing is not small enough. However, too small spacing can result in too many particles and thus increase the computational cost.
