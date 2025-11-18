@@ -23,31 +23,31 @@ pip install .
 
 Particles of specified geometries are typically created by the `lattice` command in LAMMPS, which can lead to rough surfaces when the particle spacing is not small enough. However, too small spacing can result in too many particles and thus increase the computational cost.
 
-![](https://fengimages-1310812903.cos.ap-shanghai.myqcloud.com/20240402203849.png)
+![](static/lattice-lmp.png)
 
 The case is the same when one creates atoms based on an external STL file (an example STL file exported by COMSOL is shown below):
 
-![](https://fengimages-1310812903.cos.ap-shanghai.myqcloud.com/20251117123120.png)
+![](static/comsol.png)
 
 ## Features
 
 To resolve this problem, I developed this package for easy construction of geometries where smooth surfaces are required. Miscellaneous geometries are provided, including 1D geometries (lines and curves):
 
-![](https://fengimages-1310812903.cos.ap-shanghai.myqcloud.com/20251117124159.png)
+![](static/1Dgeo.png)
 
 2D geometries (rectangles and circles):
 
-![](https://fengimages-1310812903.cos.ap-shanghai.myqcloud.com/20251117124218.png)
+![](static/2Dgeo.png)
 
 3D geometries (blocks, cylinders, tori, and spheres):
 
-![](https://fengimages-1310812903.cos.ap-shanghai.myqcloud.com/20251117124231.png)
+![](static/3Dgeo.png)
 
 all of which can be surface, thick shells, or filled bodies.
 
 Diverse operations are also provided, including translation, mirror, rotation, stack, clipping, union, intersection, and subtraction.
 
-![](https://fengimages-1310812903.cos.ap-shanghai.myqcloud.com/20251117124246.png)
+![](static/ops.png)
 
 Some utility functions are also provided.
 
@@ -55,9 +55,13 @@ Some utility functions are also provided.
 
 `examples/gallery.py` provided detailed scripts to yield the geometries above.
 
-Two more examples are given to shown how to couple geoparticle with LAMMPS. The first example is the 2D gas-liquid dam break, while the second is the 3D human duodenum whose particles are connected with bonds and angles (bonded particle method) to model the continuum.
+Two more examples are given to shown how to couple geoparticle with LAMMPS. The first example is the 2D gas-liquid dam break, while the second is a 3D intestine connected with an inlet and an outlet.
 
-![](https://fengimages-1310812903.cos.ap-shanghai.myqcloud.com/20251117163138.png)
+![](static/dam.png)
+
+![](static/intestine.png)
+
+See the [documentation](https://geoparticle-tutorial.readthedocs.io/en/latest/) for details.
 
 ## Limitations
 

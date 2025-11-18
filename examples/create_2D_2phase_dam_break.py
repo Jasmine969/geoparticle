@@ -7,20 +7,34 @@ l_box = 0.01
 h_box = 0.006
 l_water = 0.003
 h_water = 0.0045
-wall = gp.ThickRectangle(l_box, h_box, 2, 0, 'z', dl, 'wall')
-water = gp.FilledRectangle(l_water, h_water, 0, 'z', dl, name='water').shift(x=dl, y=dl)
+n_thick = 2
+wall = gp.ThickRectangle(
+    length=l_box,  # inner length
+    width=h_box,  # inner height
+    n_thick=n_thick,  # number of particle layers
+    axis='z',  # axis normal to the rectangle plane
+    dl=dl,  # particle spacing
+    name='wall'  # name of the geometry for reference
+)
+water = gp.FilledRectangle(
+    length=l_water, width=h_water, axis='z', dl=dl, name='water'
+).shift(x=dl, y=dl)
 gas = gp.FilledRectangle(
-    l_box - 2 * dl, h_box - 2 * dl, 0, 'z', dl, name='gas'
-).shift(x=dl, y=dl).subtract(water, rmax=1e-6)
+    l_box - 2 * dl, h_box - 2 * dl, 'z', dl, name='gas'
+).shift(x=dl, y=dl)
+gas = gas.subtract(
+    water,  # which geometry to subtract
+    rmax=1e-6  # maximum distance to look for overlapping
+)
 
-fac_buf = 1
+lmp = lammps(cmdargs=['-screen', 'none', '-log', 'none'])
+fac_buf = 0.5
 xlo = wall.xs.min() - wall.xs.max() * fac_buf
 xhi = wall.xs.max() * (1 + fac_buf)
 ylo = wall.ys.min() - wall.ys.max() * fac_buf
 yhi = wall.ys.max() * (1 + fac_buf)
 zlo = -3e-4
 zhi = 3e-4
-lmp = lammps(cmdargs=['-screen', 'none', '-log', 'none'])
 lmp.commands_string(f"""
 dimension	2
 atom_style  rheo
