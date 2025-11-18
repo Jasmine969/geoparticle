@@ -3,11 +3,14 @@ from .ops import *
 from .shapes import *
 from .utils import n_per_ring
 
-__version__ = '0.1.0'
+__version__ = '1.0.2'
 __author__ = 'Jasmine969'
 __all__ = [
     'Geometry',
     # Operations
+    'Shift',
+    'Mirror',
+    'Rotate',
     'Union',
     'Intersect',
     'Subtract',
@@ -20,7 +23,7 @@ __all__ = [
     'Circle',
     'FilledCircle',
     'ThickRing',
-    'Torus2D',
+    'ConcentricArc',
     'Rectangle',
     'ThickRectangle',
     'FilledRectangle',

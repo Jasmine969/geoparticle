@@ -1,7 +1,7 @@
 Metadata-Version: 2.4
 Name: geoparticle
-Version: 0.1.1
-Summary: geoparticle 0.1.1
+Version: 1.0.1
+Summary: geoparticle 1.0.1
 Author-email: Hong Zhu <hzhu1@stu.suda.edu.cn>
 Maintainer-email: Hong Zhu <hzhu1@stu.suda.edu.cn>
 License: Apache-2.0
@@ -40,31 +40,31 @@ pip install .
 
 Particles of specified geometries are typically created by the `lattice` command in LAMMPS, which can lead to rough surfaces when the particle spacing is not small enough. However, too small spacing can result in too many particles and thus increase the computational cost.
 
-![](static/lattice-lmp.png)
+![](https://raw.githubusercontent.com/Jasmine969/geoparticle/master/static/lattice-lmp.png)
 
 The case is the same when one creates atoms based on an external STL file (an example STL file exported by COMSOL is shown below):
 
-![](static/comsol.png)
+![](https://raw.githubusercontent.com/Jasmine969/geoparticle/master/static/comsol.png)
 
 ## Features
 
 To resolve this problem, I developed this package for easy construction of geometries where smooth surfaces are required. Miscellaneous geometries are provided, including 1D geometries (lines and curves):
 
-![](static/1Dgeo.png)
+![](https://raw.githubusercontent.com/Jasmine969/geoparticle/master/static/1Dgeo.png)
 
 2D geometries (rectangles and circles):
 
-![](static/2Dgeo.png)
+![](https://raw.githubusercontent.com/Jasmine969/geoparticle/master/static/2Dgeo.png)
 
 3D geometries (blocks, cylinders, tori, and spheres):
 
-![](static/3Dgeo.png)
+![](https://raw.githubusercontent.com/Jasmine969/geoparticle/master/static/3Dgeo.png)
 
 all of which can be surface, thick shells, or filled bodies.
 
 Diverse operations are also provided, including translation, mirror, rotation, stack, clipping, union, intersection, and subtraction.
 
-![](static/ops.png)
+![](https://raw.githubusercontent.com/Jasmine969/geoparticle/master/static/ops.png)
 
 Some utility functions are also provided.
 
@@ -74,9 +74,9 @@ Some utility functions are also provided.
 
 Two more examples are given to shown how to couple geoparticle with LAMMPS. The first example is the 2D gas-liquid dam break, while the second is a 3D intestine connected with an inlet and an outlet.
 
-![](static/dam.png)
+![](https://raw.githubusercontent.com/Jasmine969/geoparticle/master/static/dam.png)
 
-![](static/intestine.png)
+![](https://raw.githubusercontent.com/Jasmine969/geoparticle/master/static/intestine.png)
 
 See the [documentation](https://geoparticle-tutorial.readthedocs.io/en/latest/) for details.
 
