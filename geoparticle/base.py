@@ -1,3 +1,11 @@
+"""
+This module defines a base Geometry class for handling geometric objects in 2D and 3D space.
+It includes methods for coordinate management,
+vector transformations (shift, mirror, rotate), and geometric operations
+(union, subtraction, intersection, stacking, clipping).
+The class also supports plotting and checking for overlapping points.
+"""
+
 from __future__ import annotations
 import numpy as np
 from copy import deepcopy
@@ -26,15 +34,18 @@ class Geometry(metaclass=CounterMeta):
     """
     Base class for geometry objects, providing utilities for vector transformations
     and coordinate management.
+
+    Shortest import: `from geoparticle import Geometry`
     """
 
-    def __init__(self, name: str | None = None, dimension: int = None):
+    def __init__(self, name: str | None = None, dimension: int | None = None):
         """
         Initialize a Geometry object with optional naming.
 
         Args:
             name (str | None): Optional name for the geometry. Defaults to a
                                generated name based on the class name and counter.
+            dimension (int | None): Optional dimension of the geometry. Defaults to None.
         """
         type(self).counter += 1
         self.xs = np.array([], dtype=float)  # X-coordinates of the geometry
@@ -317,8 +328,7 @@ class Geometry(metaclass=CounterMeta):
         Args:
             other (Geometry): Another geometry to union with.
 
-        R
-          Returns:
+        Returns:
             Geometry: The updated geometry object (self) after the in-place union.
 
         Raises:

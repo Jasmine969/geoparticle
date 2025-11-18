@@ -1,3 +1,5 @@
+"""geoparticle"""
+
 from .base import Geometry
 from .ops import *
 from .shapes import *

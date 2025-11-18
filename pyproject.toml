@@ -16,6 +16,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/Jasmine969/GeomParticle"
+Documentation = 'https://geoparticle-tutorial.readthedocs.io/en/latest/'
 
 [build-system]
 requires = ["setuptools >= 68", "wheel"]

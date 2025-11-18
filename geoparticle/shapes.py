@@ -1,3 +1,7 @@
+"""
+This module provides various predefined geometric shapes in 2D and 3D,
+including lines, arcs, rectangles, circles, blocks, cylinders, tori, and spheres.
+"""
 from warnings import warn
 from .utils import *
 from .ops import *
@@ -7,6 +11,8 @@ class Line(Geometry):
     """
     1D line aligned to a principal axis, then reoriented.
     Default origin is the line end with a smaller coordinate along the principal axis.
+
+    Shortest import: `from geoparticle import Line`
     """
 
     def __init__(self, length: float, direction: str, dl: float, name=None):
@@ -31,6 +37,8 @@ class SymmLines(Geometry):
     """
     Two symmetric lines centered at origin and aligned along `direction`.
     Default origin is one of the symmetric line ends with a smaller coordinate along the principal axis.
+
+    Shortest import: `from geoparticle import SymmLines`
     """
 
     def __init__(self, length: float, direction: str, dist_half: float, dl: float, name=None):
@@ -54,6 +62,8 @@ class Arc(Geometry):
     """
     2D circular arc on a plane.
     Default origin is at the center of the arc.
+
+    Shortest import: `from geoparticle import Arc`
     """
 
     def __init__(self, r: float, phi_range: str, plane: str, dl: float, name=None):
@@ -80,6 +90,8 @@ class ConcentricArc(Geometry):
     """
     Two concentric arcs.
     Default origin is at the center of the arcs.
+
+    Shortest import: `from geoparticle import ConcentricArc`
     """
 
     def __init__(self, r_out: float, r_in: float, dl: float, plane='XOZ', phi_range='[0,360)', name=None):
@@ -104,6 +116,8 @@ class Circle(Arc):
     """
     Full circle as an arc over [0,360).
     Default origin is at the center of the circle.
+
+    Shortest import: `from geoparticle import Circle`
     """
 
     def __init__(self, r: float, plane: str, dl: float, name=None):
@@ -124,6 +138,8 @@ class Rectangle(Geometry):
     """
     2D rectangle boundary (inner dimensions).
     Default origin is at the vertex with the smallest (x,y,z) coordinates.
+
+    Shortest import: `from geoparticle import Rectangle`
     """
 
     def __init__(self, length: float, width: float, axis: str, dl: float, name=None):
@@ -162,6 +178,8 @@ class ThickRectangle(Geometry):
     """
     Rectangle wall with thickness inwards/outwards by dl-layers. Inner dims are (length,width).
     Default origin is at the vertex with the smallest (x,y,z) coordinates of the innermost layer.
+
+    Shortest import: `from geoparticle import ThickRectangle`
     """
 
     def __init__(self, length: float, width: float, n_thick: int,
@@ -193,6 +211,8 @@ class FilledRectangle(Geometry):
     """
     2D filled rectangle.
     Default origin is at the vertex with the smallest (x,y,z) coordinates.
+
+    Shortest import: `from geoparticle import FilledRectangle`
     """
 
     def __init__(self, length: float, width: float, axis: str, dl: float, name=None):
@@ -223,6 +243,8 @@ class ThickRing(Geometry):
     """
     2D ring region between inner and outer circles. Inner/outer rings can be included or excluded.
     Default origin is at the center of the ring.
+
+    Shortest import: `from geoparticle import ThickRing`
     """
 
     def __init__(self, r_out: float, r_in: float, dl: float,
@@ -280,6 +302,8 @@ class FilledCircle(ThickRing):
     """
     2D filled circle (ring with r_in=0 and inner/outer included).
     Default origin is at the center of the circle.
+
+    Shortest import: `from geoparticle import FilledCircle`
     """
 
     def __init__(self, r: float, dl: float, axis: str = 'y', name=None):
@@ -301,6 +325,8 @@ class Block(Geometry):
     """
     3D block by stacking a filled rectangle along the z-axis.
     Default origin is at the vertex with the smallest (x,y,z) coordinates.
+
+    Shortest import: `from geoparticle import Block`
     """
 
     def __init__(self, length: float, width: float, height: float, dl: float, name=None):
@@ -327,6 +353,8 @@ class ThickBlockWall(Geometry):
     """
     3D thick walls of a rectangular box, including side walls and top/bottom lids.
     Default origin is at the vertex with the smallest (x,y,z) coordinates of the innermost layer.
+
+    Shortest import: `from geoparticle import ThickBlockWall`
     """
 
     def __init__(self, length: float, width: float, height: float, n_thick: int, dl: float, name=None):
@@ -355,6 +383,8 @@ class CylinderSide(Geometry):
     """
     Side surface of a cylinder.
     Default origin is at the bottom/left/back center of the cylinder.
+
+    Shortest import: `from geoparticle import CylinderSide`
     """
 
     def __init__(self, r: float, l_axis: float, dl: float, axis: str = 'y', name=None):
@@ -397,6 +427,8 @@ class ThickCylinderSide(Geometry):
     """
     Thick wall of a cylinder.
     Default origin is at the bottom/left/back center of the cylinder.
+
+    Shortest import: `from geoparticle import ThickCylinderSide`
     """
 
     def __init__(self, r_out, r_in, l_axis: float, dl: float,
@@ -425,6 +457,8 @@ class FilledCylinder(Geometry):
     """
     Filled cylinder volume.
     Default origin is at the bottom/left/back center of the cylinder.
+
+    Shortest import: `from geoparticle import FilledCylinder`
     """
 
     def __init__(self, r: float, l_axis: float, dl: float, axis: str = 'y', name=None):
@@ -451,6 +485,8 @@ class TorusSurface(Geometry):
     """
     3D torus surface (tube radius r_minor around circle radius r_major).
     Default origin is at the center of the large circle.
+
+    Shortest import: `from geoparticle import TorusSurface`
     """
 
     def __init__(self, r_minor: float, r_major: float, dl: float, n_ring: int = None,
@@ -515,6 +551,8 @@ class ThickTorusWall(Geometry):
     """
     3D thick wall of a torus.
     Default origin is at the center of the large circle.
+
+    Shortest import: `from geoparticle import ThickTorusWall`
     """
 
     def __init__(self, r_in: float, r_major: float, n_thick: int, dl: float,
@@ -547,6 +585,8 @@ class FilledTorus(ThickTorusWall):
     """
     3D filled torus volume.
     Default origin is at the center of the large circle.
+
+    Shortest import: `from geoparticle import FilledTorus`
     """
 
     def __init__(self, r_minor: float, r_major: float, dl: float,
@@ -570,6 +610,8 @@ class SphereSurface(Geometry):
     """
     3D sphere surface.
     Default origin is at the sphere center.
+
+    Shortest import: `from geoparticle import SphereSurface`
     """
 
     def __init__(self, r: float, dl: float, name=None):
@@ -714,6 +756,8 @@ class ThickSphere(Geometry):
     """
     Thick spherical shell between inner and outer spheres.
     Default origin is at the sphere center.
+
+    Shortest import: `from geoparticle import ThickSphere`
     """
 
     def __init__(self, r_out: float, r_in: float, dl: float, name=None):
@@ -740,6 +784,8 @@ class FilledSphere(ThickSphere):
     """
     Filled sphere volume.
     Default origin is at the sphere center.
+
+    Shortest import: `from geoparticle import FilledSphere`
     """
 
     def __init__(self, r: float, dl: float, name=None):

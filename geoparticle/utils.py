@@ -2,6 +2,7 @@
 Shared utilities for geometry construction.
 All angles are in radians internally unless noted.
 """
+
 from __future__ import annotations
 import numpy as np
 from warnings import warn
@@ -28,6 +29,8 @@ def n_per_ring(r, d, phi_ring=2 * np.pi) -> np.ndarray | int:
     """
     Compute the number of points for a ring at a given radius with specified spacing.
 
+    Shortest import: `from geoparticle import n_per_ring`
+
     Args:
         r (float or np.ndarray): Radius of the ring(s).
         d (float): Desired spacing between points.
@@ -49,6 +52,8 @@ def n_per_ring(r, d, phi_ring=2 * np.pi) -> np.ndarray | int:
 def spacing_ring(r, n, phi_ring=2 * np.pi) -> np.ndarray:
     """
     Compute the spacing between points on a ring given the number of points.
+
+    Shortest import: `from geoparticle import spacing_ring`
 
     Args:
         r (float or np.ndarray): Radius of the ring(s).
@@ -204,6 +209,8 @@ def _arange0_quantized(end: float, dl: float) -> np.ndarray:
 def get_wall_ID(i, j, n_ring, smallest_ID=1):
     """
     Compute the ID of a cylinder wall based on its ring and axis indices.
+
+    Shortest import: from geoparticle import get_wall_ID`
 
     Args:
         i (int): Index on the ring.

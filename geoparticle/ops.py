@@ -1,3 +1,9 @@
+"""
+This module provides various geometric operations on Geometry objects,
+including shifting, mirroring, rotating, union, subtraction, intersection,
+stacking, and clipping.
+"""
+
 from __future__ import annotations
 import numpy as np
 from .base import Geometry
@@ -5,7 +11,11 @@ from typing import Iterable, Tuple, List
 
 
 class Shift(Geometry):
-    """Shift geometry by given offsets in x, y, z directions."""
+    """
+    Shift geometry by given offsets in x, y, z directions.
+
+    Shortest import: `from geoparticle import Shift`
+    """
 
     def __init__(self, geo: Geometry,
                  x: float | None = None, y: float | None = None, z: float | None = None,
@@ -25,6 +35,11 @@ class Shift(Geometry):
 
 
 class Mirror(Geometry):
+    """
+    Mirror geometry across a specified plane.
+
+    Shortest import: `from geoparticle import Mirror`
+    """
     def __init__(self, geo: Geometry, plane_name: str, plane_pos: float, name=None):
         """
         Initialize a Mirror object that mirrors the geometry across a specified plane.
@@ -42,7 +57,11 @@ class Mirror(Geometry):
 
 
 class Rotate(Geometry):
-    """Rotate geometry around an axis by a given angle."""
+    """
+    Rotate geometry around an axis by a given angle.
+
+    Shortest import: `from geoparticle import Rotate`
+    """
 
     def __init__(self, geo: Geometry,
                  angle_deg: float, axis_direction: str | None = None,
@@ -70,7 +89,11 @@ class Rotate(Geometry):
 
 
 class Union(Geometry):
-    """Concatenate multiple geometries."""
+    """
+    Concatenate multiple geometries.
+
+    Shortest import: `from geoparticle import Union`
+    """
 
     def __init__(self, geometries: List[Geometry] | Tuple[Geometry], name=None):
         """
@@ -90,7 +113,11 @@ class Union(Geometry):
 
 
 class Subtract(Geometry):
-    """Pointwise subtraction: keep points in geo1 farther than `rmax` from any point in geo2."""
+    """
+    Pointwise subtraction: keep points in geo1 farther than `rmax` from any point in geo2.
+
+    Shortest import: `from geoparticle import Subtract`
+    """
 
     def __init__(self, geo1: Geometry, geo2: Geometry, rmax: float = 1e-5, name=None):
         """
@@ -108,7 +135,8 @@ class Subtract(Geometry):
 
 
 class Intersect(Geometry):
-    """Pointwise intersection of multiple geometries.
+    """
+    Pointwise intersection of multiple geometries.
 
     Keeps points from the first geometry that are within `rmax` of at least one
     point in every other geometry (common intersection under tolerance).
@@ -116,6 +144,8 @@ class Intersect(Geometry):
     Usage:
     - Intersect(g1, g2, g3, ..., rmax=1e-5)
     - Intersect([g1, g2, g3, ...], rmax=1e-5)
+
+    Shortest import: `from geoparticle import Intersect`
     """
 
     def __init__(self, geometries: Tuple[Geometry] | List[Geometry],
@@ -138,7 +168,11 @@ class Intersect(Geometry):
 
 
 class Stack(Geometry):
-    """Stack a 2D layer along an axis by repeating its points at dl-spacing."""
+    """
+    Stack a 2D layer along an axis by repeating its points at dl-spacing.
+
+    Shortest import: `from geoparticle import Stack`
+    """
 
     def __init__(self, layer: Geometry, axis: str, n_axis: int,
                  dl: float, dimension: int, name=None):
@@ -160,6 +194,8 @@ class Stack(Geometry):
 class Clip(Geometry):
     """
     Half-space clipping by a named plane through the origin or an arbitrary plane.
+
+    Shortest import: `from geoparticle import Clip`
     """
 
     def __init__(

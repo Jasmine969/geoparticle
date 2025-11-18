@@ -3,6 +3,10 @@
 
 I mainly use this package for geometry construction in LAMMPS, with some examples provided in the repository; of course, it can also be used for other software.
 
+<!-- README.md badge -->
+[![Docs Status](https://readthedocs.org/projects/geoparticle-tutorial/badge/?version=latest)](https://geoparticle-tutorial.readthedocs.io/en/latest/)
+[![pypi](https://img.shields.io/pypi/v/geoparticle.svg)](https://pypi.org/project/geoparticle/)
+
 ## Installation
 
 ### Installing from pypi
