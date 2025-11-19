@@ -54,15 +54,20 @@ class Geometry(metaclass=CounterMeta):
         self.name = name or f'{self.__class__.__name__} {self.get_counter()}'
         self.dimension = dimension
 
-    def copy(self):
+    def copy(self, name: str | None = None):
         """
         Create a deep copy of the geometry object.
 
+        Args:
+            name (str | None): Optional name for the copied geometry. If None,
+                               the original name is retained.
         Returns:
             Geometry: A new geometry object with the same attributes.
         """
         g = self.__class__.__new__(self.__class__)
         g.__dict__.update(deepcopy(self.__dict__))
+        if name is not None:
+            g.name = name
         return g
 
     def load_from(self, other: Geometry):
@@ -179,7 +184,7 @@ class Geometry(metaclass=CounterMeta):
         self.xs, self.ys, self.zs = xs.copy(), ys.copy(), zs.copy()
         return self
 
-    def shift(self, x=0.0, y=0.0, z=0.0):
+    def shift(self, x=0.0, y=0.0, z=0.0, inplace: bool = False, name: str | None = None):
         """
         Translate the geometry by the given offsets.
 
@@ -187,26 +192,39 @@ class Geometry(metaclass=CounterMeta):
             x (float): Offset along the X-axis.
             y (float): Offset along the Y-axis.
             z (float): Offset along the Z-axis.
+            inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
+            name (str | None): Optional name for the resulting geometry.
+                Cannot be given when inplace is True. If not given, the original name is used.
 
         Returns:
-            Geometry: A new geometry object with shifted coordinates.
+            Geometry | None: New geometry if not inplace, otherwise None.
         """
+        if inplace and name is not None:
+            raise ValueError('Cannot specify name when inplace is True')
         g = self.copy()
-        g.xs = g.xs + x
-        g.ys = g.ys + y
-        g.zs = g.zs + z
+        g.xs += x
+        g.ys += y
+        g.zs += z
+        if inplace:
+            self.load_from(g)
+            return None
+        if name is not None:
+            g.name = name
         return g
 
-    def mirror(self, plane_name: str, plane_pos: float):
+    def mirror(self, plane_name: str, plane_pos: float, inplace: bool = False, name: str | None = None):
         """
         Mirror the geometry across a principal plane.
 
         Args:
             plane_name (str): Name of the plane ('YOZ', 'XOY', or 'XOZ').
             plane_pos (float): Position of the plane.
+            inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
+            name (str | None): Optional name for the resulting geometry.
+                Cannot be given when inplace is True. If not given, the original name is used.
 
         Returns:
-            Geometry: A new geometry object mirrored across the specified plane.
+            Geometry | None: New geometry if not inplace, otherwise None
 
         Raises:
             ValueError: If an invalid plane name is provided.
@@ -220,11 +238,17 @@ class Geometry(metaclass=CounterMeta):
             g.ys = plane_pos * 2 - g.ys
         else:
             raise ValueError('Invalid plane_name')
+        if inplace:
+            self.load_from(g)
+            return None
+        if name is not None:
+            g.name = name
         return g
 
     def rotate(self, angle_deg: float, axis_direction: str | None = None,
                axis_point1: Iterable[float] | None = None,
-               axis_point2: Iterable[float] | None = None):
+               axis_point2: Iterable[float] | None = None,
+               inplace: bool = False, name: str | None = None):
         """
         Rotate the geometry around a principal axis or a custom axis.
 
@@ -236,9 +260,12 @@ class Geometry(metaclass=CounterMeta):
             axis_direction (str | None): Principal axis ('x', 'y', or 'z').
             axis_point1 (Iterable[float] | None): First point defining the custom axis.
             axis_point2 (Iterable[float] | None): Second point defining the custom axis.
+            inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
+            name (str | None): Optional name for the resulting geometry.
+                Cannot be given when inplace is True. If not given, the original name is used.
 
         Returns:
-            Geometry: A new geometry object with rotated coordinates.
+            Geometry | None: A new geometry object after rotation, or None if inplace is True.
 
         Raises:
             ValueError: If invalid axis parameters are provided.
@@ -271,20 +298,29 @@ class Geometry(metaclass=CounterMeta):
         rot = Rotation.from_rotvec(axis_vec * angle)
         pts = np.column_stack((self.xs, self.ys, self.zs))
         rotated = rot.apply(pts - p1) + p1
+        g = Geometry(dimension=self.dimension
+                     ).set_coord(rotated[:, 0], rotated[:, 1], rotated[:, 2])
+        if inplace:
+            self.load_from(g)
+            return None
+        if name is not None:
+            g.name = name
+        return g
 
-        return Geometry(dimension=self.dimension
-                        ).set_coord(rotated[:, 0], rotated[:, 1], rotated[:, 2])
-
-    def union(self, geometries: Geometry | List[Geometry] | Tuple[Geometry], name: str | None = None):
+    def union(self, geometries: Geometry | List[Geometry] | Tuple[Geometry],
+              inplace: bool = False,
+              name: str | None = None):
         """
         Concatenate this geometry with others and return a new Geometry.
 
         Args:
             geometries (Geometry | List[Geometry] | Tuple[Geometry]): Other Geometry objects to union with.
+            inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
             name (str | None): Optional name for the resulting geometry.
+                Cannot be given when inplace is True. If not given, the original name is used.
 
         Returns:
-            Geometry: A new geometry object containing the union of points.
+            Geometry | None: A new geometry object after union, or None if inplace is True.
         """
         if isinstance(geometries, Geometry):
             geos = [geometries]
@@ -302,7 +338,13 @@ class Geometry(metaclass=CounterMeta):
         xs = np.hstack([g.xs for g in all_geos if g.size > 0])
         ys = np.hstack([g.ys for g in all_geos if g.size > 0])
         zs = np.hstack([g.zs for g in all_geos if g.size > 0])
-        return Geometry(name=name, dimension=dimension).set_coord(xs, ys, zs)
+        g = Geometry(name=name, dimension=dimension).set_coord(xs, ys, zs)
+        if inplace:
+            self.load_from(g)
+            return None
+        if name is not None:
+            g.name = name
+        return g
 
     def __add__(self, other):
         """
@@ -339,17 +381,21 @@ class Geometry(metaclass=CounterMeta):
             return self
         return NotImplemented
 
-    def subtract(self, geo2: Geometry, rmax: float = 1e-5, name: str | None = None):
+    def subtract(self, geo2: Geometry, rmax: float = 1e-5,
+                 inplace: bool = False,
+                 name: str | None = None):
         """
         Return points from self that are at least rmax away from any point in geo2.
 
         Args:
             geo2 (Geometry): Geometry to subtract from self.
             rmax (float): Minimum distance to consider a point as not overlapping.
+            inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
             name (str | None): Optional name for the resulting geometry.
+                Cannot be given when inplace is True. If not given, the original name is used.
 
         Returns:
-            Geometry: A new geometry object after subtraction.
+            Geometry | None: A new geometry object after subtraction, or None if inplace is True.
         """
         if self.size == 0:
             return Geometry(name=name)
@@ -358,8 +404,14 @@ class Geometry(metaclass=CounterMeta):
         tree = KDTree(geo2.matrix_coords)
         d, _ = tree.query(self.matrix_coords)
         mask = d >= rmax
-        return Geometry(name=name, dimension=self.dimension
-                        ).set_coord(self.xs[mask], self.ys[mask], self.zs[mask])
+        g = Geometry(name=name, dimension=self.dimension
+                     ).set_coord(self.xs[mask], self.ys[mask], self.zs[mask])
+        if inplace:
+            self.load_from(g)
+            return None
+        if name is not None:
+            g.name = name
+        return g
 
     def __sub__(self, other):
         if isinstance(other, Geometry):
@@ -373,17 +425,20 @@ class Geometry(metaclass=CounterMeta):
         return NotImplemented
 
     def intersect(self, geometries: Geometry | List[Geometry] | Tuple[Geometry],
-                  rmax: float = 1e-5, name: str | None = None):
+                  rmax: float = 1e-5, inplace: bool = False,
+                  name: str | None = None):
         """
         Keep points from self that are within rmax of at least one point in every other geometry.
 
         Args:
             geometries (Geometry | List[Geometry] | Tuple[Geometry]): Other Geometry objects to intersect with.
             rmax (float): Maximum distance to consider points as intersecting.
+            inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
             name (str | None): Optional name for the resulting geometry.
+                Cannot be given when inplace is True. If not given, the original name is used.
 
         Returns:
-            Geometry: A new geometry object after intersection.
+            Geometry | None: A new geometry object after intersection, or None if inplace is True.
         """
         others = list(geometries)
         if rmax < 0:
@@ -402,10 +457,18 @@ class Geometry(metaclass=CounterMeta):
             mask &= (d <= rmax)
             if not mask.any():
                 break
-        return Geometry(name=name, dimension=dimension
-                        ).set_coord(self.xs[mask], self.ys[mask], self.zs[mask])
+        g = Geometry(name=name, dimension=dimension
+                     ).set_coord(self.xs[mask], self.ys[mask], self.zs[mask])
+        if inplace:
+            self.load_from(g)
+            return None
+        if name is not None:
+            g.name = name
+        return g
 
-    def stack(self, axis: str, n_axis: int, dl: float, dimension: int, name: str | None = None):
+    def stack(self, axis: str, n_axis: int, dl: float, dimension: int,
+              inplace: bool = False,
+              name: str | None = None):
         """
         Stack a planar layer (self) along axis by repeating points at spacing dl.
 
@@ -415,10 +478,12 @@ class Geometry(metaclass=CounterMeta):
                           negative for negative direction.
             dl (float): Spacing between layers.
             dimension (int): Dimension of the resulting geometry (2 or 3).
+            inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
             name (str | None): Optional name for the resulting geometry.
+                Cannot be given when inplace is True. If not given, the original name is used.
 
         Returns:
-            Geometry: A new geometry object after stacking.
+            Geometry | None: A new geometry object after stacking, or None if inplace is True.
         """
         if n_axis == 0 or self.size == 0:
             return Geometry(name=name)
@@ -434,15 +499,21 @@ class Geometry(metaclass=CounterMeta):
         shifts = np.zeros((k.size, 3), dtype=float)
         shifts[:, a] = k * dl
         coords = (coord_layer[None, :, :] + shifts[:, None, :]).reshape(-1, 3)
-        return Geometry(name=name, dimension=dimension
+        g = Geometry(name=name, dimension=dimension
                         ).set_coord(coords[:, 0], coords[:, 1], coords[:, 2])
+        if inplace:
+            self.load_from(g)
+            return None
+        if name is not None:
+            g.name = name
+        return g
 
     def clip(
             self, keep: str, *,
             plane_name: str | None = None,
             plane_normal: Iterable[float] | np.ndarray | None = None,
             plane_point: Iterable[float] | np.ndarray | None = None,
-            name: str | None = None,
+            inplace: bool = False, name: str | None = None,
     ):
         """
         Clip geometry by a half-space defined by a named plane or an arbitrary plane.
@@ -456,10 +527,12 @@ class Geometry(metaclass=CounterMeta):
             plane_name (str, optional): Named plane ('XOY', 'XOZ', 'YOZ'). Defaults to None.
             plane_normal (array-like, optional): Normal vector of the plane. Defaults to None.
             plane_point (array-like, optional): A point on the plane. Defaults to None.
-            name (str, optional): Name of the resulting geometry. Defaults to None.
+            inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
+            name (str | None): Optional name for the resulting geometry.
+                Cannot be given when inplace is True. If not given, the original name is used.
 
         Returns:
-            Geometry: A new geometry object after clipping.
+            Geometry | None: A new geometry object after clipping, or None if inplace is True.
 
         Raises:
             ValueError: If invalid arguments are provided.
@@ -493,8 +566,14 @@ class Geometry(metaclass=CounterMeta):
             mask = s >= 0.0
         else:
             mask = s <= 0.0
-        return Geometry(name=name, dimension=self.dimension
+        g = Geometry(name=name, dimension=self.dimension
                         ).set_coord(self.xs[mask], self.ys[mask], self.zs[mask])
+        if inplace:
+            self.load_from(g)
+            return None
+        if name is not None:
+            g.name = name
+        return g
 
     def get_and_delete(self, ids: np.ndarray):
         """
@@ -578,7 +657,7 @@ class Geometry(metaclass=CounterMeta):
         point1 = self.matrix_coords[min_idx]
         point2 = self.matrix_coords[min_pair_idx].round(4)
         if min_distance < tol:
-            warn(f'Overlap detected between point #{min_idx} '
+            warn(f'{self.name}: Overlap detected between point #{min_idx} '
                  f'{point1[0].item(), point1[1].item(), point1[2].item()}'
                  f' and #{min_pair_idx} {point2[0].item(), point2[1].item(), point2[2].item()} '
                  f'with a distance of {min_distance: .3g} < tol={tol:.3g}')

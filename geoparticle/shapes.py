@@ -35,26 +35,29 @@ class Line(Geometry):
 
 class SymmLines(Geometry):
     """
-    Two symmetric lines centered at origin and aligned along `direction`.
-    Default origin is one of the symmetric line ends with a smaller coordinate along the principal axis.
+    Two symmetrical lines centered at origin and aligned along `direction`.
+    Default origin is one of the symmetrical line ends with a smaller coordinate along the principal axis.
 
     Shortest import: `from geoparticle import SymmLines`
     """
 
-    def __init__(self, length: float, direction: str, dist_half: float, dl: float, name=None):
+    def __init__(self, length: float, direction: str, symm_plane: str,
+                 dist_half: float, dl: float, name=None):
         """
         Args:
-            length (float): Length of each symmetric line.
+            length (float): Length of each symmetrical line.
             direction (str): Principal axis direction ('x', 'y', or 'z').
+            symm_plane (str): Symmetrical plane ('XOY', 'YOZ', or 'XOZ').
             dist_half (float): Half the distance between the two lines.
             dl (float): Spacing between points along the lines.
-            name (str, optional): Name of the symmetric lines. Defaults to None.
+            name (str, optional): Name of the symmetrical lines. Defaults to None.
         """
         super().__init__(name=name or f'SymmLines {self.get_counter()}', dimension=2)
-        upper = Line(length, 'z', dl).shift(x=dist_half)
-        lower = upper.mirror('YOZ', 0)
-        me = Union((upper, lower))
-        self.set_coord(*_transform_coordinate(me.xs, me.ys, me.zs, axis=direction))
+        upper = Line(length, direction, dl)
+        normal = _resolve_axis_or_plane(plane=symm_plane)
+        eval(f'upper.shift({normal}=dist_half, inplace=True)')
+        lower = upper.mirror(symm_plane, 0)
+        self.load_from(Union((upper, lower)))
         self.check_overlap()
 
 
