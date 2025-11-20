@@ -5,7 +5,7 @@ from .ops import *
 from .shapes import *
 from .utils import n_per_ring
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 __author__ = 'Hong Zhu'
 __all__ = [
     'Geometry',
