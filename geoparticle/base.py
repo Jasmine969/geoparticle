@@ -9,7 +9,7 @@ The class also supports plotting and checking for overlapping points.
 from __future__ import annotations
 import numpy as np
 from copy import deepcopy
-from typing import Iterable, Tuple, List
+from typing import Sequence
 from scipy.spatial import KDTree
 from warnings import warn
 
@@ -248,8 +248,8 @@ class Geometry(metaclass=CounterMeta):
         return g
 
     def rotate(self, angle_deg: float, axis_direction: str | None = None,
-               axis_point1: Iterable[float] | None = None,
-               axis_point2: Iterable[float] | None = None,
+               axis_point1: Sequence[float] | None = None,
+               axis_point2: Sequence[float] | None = None,
                inplace: bool = False, name: str | None = None):
         """
         Rotate the geometry around a principal axis or a custom axis.
@@ -260,8 +260,8 @@ class Geometry(metaclass=CounterMeta):
         Args:
             angle_deg (float): Rotation angle in degrees.
             axis_direction (str | None): Principal axis ('x', 'y', or 'z').
-            axis_point1 (Iterable[float] | None): First point defining the custom axis.
-            axis_point2 (Iterable[float] | None): Second point defining the custom axis.
+            axis_point1 (Sequence[float] | None): First point defining the custom axis.
+            axis_point2 (Sequence[float] | None): Second point defining the custom axis.
             inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
             name (str | None): Optional name for the resulting geometry.
                 Cannot be given when inplace is True. If not given, the original name is used.
@@ -309,14 +309,14 @@ class Geometry(metaclass=CounterMeta):
             g.name = name
         return g
 
-    def union(self, geometries: Geometry | List[Geometry, ...] | Tuple[Geometry, ...],
+    def union(self, geometries: Geometry | Sequence[Geometry],
               inplace: bool = False,
               name: str | None = None):
         """
         Concatenate this geometry with others and return a new Geometry.
 
         Args:
-            geometries (Geometry | List[Geometry, ...] | Tuple[Geometry, ...]): Other Geometry objects to union with.
+            geometries (Geometry | Sequence[Geometry]): Other Geometry objects to union with.
             inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
             name (str | None): Optional name for the resulting geometry.
                 Cannot be given when inplace is True. If not given, the original name is used.
@@ -426,14 +426,14 @@ class Geometry(metaclass=CounterMeta):
             return self
         return NotImplemented
 
-    def intersect(self, geometries: Geometry | List[Geometry, ...] | Tuple[Geometry, ...],
+    def intersect(self, geometries: Geometry | Sequence[Geometry],
                   rmax: float = 1e-5, inplace: bool = False,
                   name: str | None = None):
         """
         Keep points from self that are within rmax of at least one point in every other geometry.
 
         Args:
-            geometries (Geometry | List[Geometry, ...] | Tuple[Geometry, ...]): Other Geometry objects to intersect with.
+            geometries (Geometry | Sequence[Geometry]): Other Geometry objects to intersect with.
             rmax (float): Maximum distance to consider points as intersecting.
             inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
             name (str | None): Optional name for the resulting geometry.
@@ -502,7 +502,7 @@ class Geometry(metaclass=CounterMeta):
         shifts[:, a] = k * dl
         coords = (coord_layer[None, :, :] + shifts[:, None, :]).reshape(-1, 3)
         g = Geometry(name=name, dimension=dimension
-                        ).set_coord(coords[:, 0], coords[:, 1], coords[:, 2])
+                     ).set_coord(coords[:, 0], coords[:, 1], coords[:, 2])
         if inplace:
             self.load_from(g)
             return None
@@ -513,8 +513,8 @@ class Geometry(metaclass=CounterMeta):
     def clip(
             self, keep: str, *,
             plane_name: str | None = None,
-            plane_normal: Iterable[float] | np.ndarray | None = None,
-            plane_point: Iterable[float] | np.ndarray | None = None,
+            plane_normal: Sequence[float] | np.ndarray | None = None,
+            plane_point: Sequence[float] | np.ndarray | None = None,
             inplace: bool = False, name: str | None = None,
     ):
         """
@@ -527,8 +527,8 @@ class Geometry(metaclass=CounterMeta):
         Args:
             keep (str): Side to keep ('positive' or 'negative').
             plane_name (str, optional): Named plane ('XOY', 'XOZ', 'YOZ'). Defaults to None.
-            plane_normal (array-like, optional): Normal vector of the plane. Defaults to None.
-            plane_point (array-like, optional): A point on the plane. Defaults to None.
+            plane_normal (Sequence[float], optional): Normal vector of the plane. Defaults to None.
+            plane_point (Sequence[float], optional): A point on the plane. Defaults to None.
             inplace (bool): If True, modify the geometry in place. Otherwise, return a new geometry.
             name (str | None): Optional name for the resulting geometry.
                 Cannot be given when inplace is True. If not given, the original name is used.
@@ -569,7 +569,7 @@ class Geometry(metaclass=CounterMeta):
         else:
             mask = s <= 0.0
         g = Geometry(name=name, dimension=self.dimension
-                        ).set_coord(self.xs[mask], self.ys[mask], self.zs[mask])
+                     ).set_coord(self.xs[mask], self.ys[mask], self.zs[mask])
         if inplace:
             self.load_from(g)
             return None

@@ -5,6 +5,7 @@ including lines, arcs, rectangles, circles, blocks, cylinders, tori, and spheres
 from warnings import warn
 from .utils import *
 from .ops import *
+from typing import Sequence
 
 
 class Line(Geometry):
@@ -15,14 +16,14 @@ class Line(Geometry):
     """
 
     def __init__(self, length: float, direction: str, dl: float,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0),
+                 anchor: Sequence[float] = (0, 0, 0),
                  name=None):
         """
         Args:
             length (float): Length of the line.
             direction (str): Principal axis direction ('x', 'y', or 'z').
             dl (float): Spacing between points along the line.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the line. The anchor is the line end with
                 a smaller coordinate along the principal axis. Defaults to (0,0,0).
             name (str, optional): Name of the line. Defaults to None.
@@ -48,7 +49,7 @@ class SymmLines(Geometry):
     def __init__(self, length: float, direction: str, symm_plane: str,
                  dist_half: float,
                  dl: float,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0),
+                 anchor: Sequence[float] = (0, 0, 0),
                  name=None):
         """
         Args:
@@ -57,7 +58,7 @@ class SymmLines(Geometry):
             symm_plane (str): Symmetrical plane ('XOY', 'YOZ', or 'XOZ').
             dist_half (float): Half the distance between the two lines.
             dl (float): Spacing between points along the lines.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the symmetrical lines. The anchor is one of the
                 symmetrical line ends with a smaller coordinate along the principal axis. Defaults to (0,0,0).
             name (str, optional): Name of the symmetrical lines. Defaults to None.
@@ -80,7 +81,7 @@ class Arc(Geometry):
     """
 
     def __init__(self, r: float, phi_range: str, plane: str, dl: float, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r (float): Radius of the arc.
@@ -88,7 +89,7 @@ class Arc(Geometry):
                 notation should be used, where `[` and `]` denote inclusion, whereas `(` and `)` denote exclusion,
                 e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full circle.
             plane (str): Plane in which the arc lies ('XOY', 'YOZ', or 'XOZ').
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the arc. The anchor is the arc center.
             dl (float): Spacing between points along the arc.
             name (str, optional): Name of the arc. Defaults to None.
@@ -114,7 +115,7 @@ class ConcentricArc(Geometry):
     """
 
     def __init__(self, r_out: float, r_in: float, dl: float, plane='XOZ', phi_range='[0,360)', name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r_out (float): Outer radius.
@@ -124,7 +125,7 @@ class ConcentricArc(Geometry):
             phi_range (str, optional): Angular range of the torus in degrees. Defaults to '[180,270)'. Interval
                 notation should be used, where `[` and `]` denote inclusion, whereas `(` and `)` denote exclusion,
                 e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full circle.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the arc. The anchor is the arc center.
             name (str, optional): Name of the torus. Defaults to None.
         """
@@ -145,7 +146,7 @@ class Circle(Arc):
     """
 
     def __init__(self, r: float, plane: str, dl: float, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Initialize a Circle object.
 
@@ -154,7 +155,7 @@ class Circle(Arc):
             plane (str): Plane in which the circle lies ('XOY', 'YOZ', or 'XOZ').
             dl (float): Spacing between points along the circle.
             name (str, optional): Name of the circle. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the arc. The anchor is the circle center.
         """
         super().__init__(r, '[0,360)', plane, dl,
@@ -170,7 +171,7 @@ class Rectangle(Geometry):
     """
 
     def __init__(self, length: float, width: float, axis: str, dl: float, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Initialize a Rectangle object.
 
@@ -180,7 +181,7 @@ class Rectangle(Geometry):
             axis (str): Axis orthogonal to the rectangle ('x', 'y', or 'z').
             dl (float): Spacing between points along the rectangle boundary.
             name (str, optional): Name of the rectangle. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the rectangle. The anchor is the vertex
                 with the smallest (x,y,z) coordinates.
         """
@@ -215,7 +216,7 @@ class ThickRectangle(Geometry):
 
     def __init__(self, length: float, width: float, n_thick: int,
                  axis: str, dl: float, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Initialize a ThickRectangle object.
 
@@ -226,7 +227,7 @@ class ThickRectangle(Geometry):
             axis (str): Axis orthogonal to the rectangle ('x', 'y', or 'z').
             dl (float): Spacing between points along the rectangle boundary.
             name (str, optional): Name of the thick rectangle. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the thick rectangle. The anchor is the vertex
                 with the smallest (x,y,z) coordinates of the innermost layer.
         """
@@ -251,7 +252,7 @@ class FilledRectangle(Geometry):
     """
 
     def __init__(self, length: float, width: float, axis: str, dl: float, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Initialize a FilledRectangle object.
 
@@ -261,7 +262,7 @@ class FilledRectangle(Geometry):
             axis (str): Axis orthogonal to the rectangle ('x', 'y', or 'z').
             dl (float): Spacing between points within the rectangle.
             name (str, optional): Name of the filled rectangle. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the rectangle. The anchor is the vertex
                 with the smallest (x,y,z) coordinates.
         """
@@ -290,7 +291,7 @@ class ThickRing(Geometry):
                  incl_inner: bool = True, incl_outer: bool = True,
                  axis: str = 'y', adjust_dl: bool = False,
                  equal_size_per_circle: bool = False, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r_out (float): Outer radius of the ring.
@@ -302,7 +303,7 @@ class ThickRing(Geometry):
             adjust_dl (bool, optional): Whether to adjust spacing for the inner circle. Defaults to False.
             equal_size_per_circle (bool, optional): Whether to use equal point count per circle. Defaults to False.
             name (str, optional): Name of the thick ring. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the ring. The anchor is the ring center.
         """
         super().__init__(name=name or f'ThickRing {self.get_counter()}', dimension=2)
@@ -349,7 +350,7 @@ class FilledCircle(ThickRing):
     """
 
     def __init__(self, r: float, dl: float, axis: str = 'y', name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Initialize a FilledCircle object.
 
@@ -358,7 +359,7 @@ class FilledCircle(ThickRing):
             dl (float): Spacing between points within the circle.
             axis (str, optional): Axis orthogonal to the circle. Defaults to 'y'.
             name (str, optional): Name of the filled circle. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the circle. The anchor is the circle center.
         """
         super().__init__(r_out=r, r_in=0.0, dl=dl, incl_inner=True, incl_outer=True,
@@ -375,7 +376,7 @@ class Block(Geometry):
     """
 
     def __init__(self, length: float, width: float, height: float, dl: float, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Initialize a Block object.
 
@@ -385,7 +386,7 @@ class Block(Geometry):
             height (float): Height of the block along the z-axis.
             dl (float): Spacing between points in the grid.
             name (str, optional): Name of the block. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the block. The anchor is the vertex
                 with the smallest (x,y,z) coordinates.
         """
@@ -407,7 +408,7 @@ class ThickBlockWall(Geometry):
     """
 
     def __init__(self, length: float, width: float, height: float, n_thick: int, dl: float, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             length (float): Inner length of the box.
@@ -416,7 +417,7 @@ class ThickBlockWall(Geometry):
             n_thick (int): Number of thickness layers for the walls.
             dl (float): Spacing between points in the grid.
             name (str, optional): Name of the thick block wall. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the thick block wall. The anchor is the vertex
                 with the smallest (x,y,z) coordinates of the innermost layer.
         """
@@ -441,7 +442,7 @@ class CylinderSide(Geometry):
     """
 
     def __init__(self, r: float, l_axis: float, dl: float, axis: str = 'y', name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r (float): Radius of the cylinder.
@@ -449,7 +450,7 @@ class CylinderSide(Geometry):
             dl (float): Spacing between points in the grid.
             axis (str, optional): Axis along which the cylinder is oriented. Defaults to 'y'.
             name (str, optional): Name of the cylinder side. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the cylinder side. The anchor is the
                 bottom/left/back center of the cylinder.
         """
@@ -490,7 +491,7 @@ class ThickCylinderSide(Geometry):
 
     def __init__(self, r_out, r_in, l_axis: float, dl: float,
                  axis: str = 'y', name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r_out (float): Outer radius of the cylinder.
@@ -499,7 +500,7 @@ class ThickCylinderSide(Geometry):
             dl (float): Spacing between points in the grid.
             axis (str, optional): Axis along which the cylinder is oriented. Defaults to 'y'.
             name (str, optional): Name of the thick cylinder wall. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the cylinder side. The anchor is the
                 bottom/left/back center of the cylinder.
         """
@@ -523,7 +524,7 @@ class FilledCylinder(Geometry):
     """
 
     def __init__(self, r: float, l_axis: float, dl: float, axis: str = 'y', name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r (float): Radius of the cylinder.
@@ -531,7 +532,7 @@ class FilledCylinder(Geometry):
             dl (float): Spacing between points in the grid.
             axis (str, optional): Axis along which the cylinder is oriented. Defaults to 'y'.
             name (str, optional): Name of the filled cylinder. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the cylinder side. The anchor is the
                 bottom/left/back center of the cylinder.
         """
@@ -556,7 +557,7 @@ class TorusSurface(Geometry):
 
     def __init__(self, r_minor: float, r_major: float, dl: float, n_ring: int = None,
                  plane='XOZ', phi_range='[180,270)', regular_id=False, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r_minor (float): Radius of the torus tube.
@@ -569,7 +570,7 @@ class TorusSurface(Geometry):
                 e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full torus.
             regular_id (bool, optional): Whether to use regular indexing for points. Defaults to False.
             name (str, optional): Name of the torus. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the torus. The anchor is the center of the major circle.
         """
         super().__init__(name=name or f'TorusSurface {self.get_counter()}', dimension=3)
@@ -627,7 +628,7 @@ class ThickTorusWall(Geometry):
 
     def __init__(self, r_in: float, r_major: float, n_thick: int, dl: float,
                  plane='XOZ', phi_range='[180,270)', name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r_in (float): Inner radius of the torus tube.
@@ -639,7 +640,7 @@ class ThickTorusWall(Geometry):
                 notation should be used, where `[` and `]` denote inclusion, whereas `(` and `)` denote exclusion,
                 e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full torus.
             name (str, optional): Name of the thick torus wall. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the torus. The anchor is the center of the major circle.
         """
         super().__init__(name=name or f'ThickTorusWall {self.get_counter()}', dimension=3)
@@ -666,7 +667,7 @@ class FilledTorus(ThickTorusWall):
 
     def __init__(self, r_minor: float, r_major: float, dl: float,
                  plane='XOZ', phi_range='[180,270)', name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r_minor (float): Outer radius of the torus tube.
@@ -677,7 +678,7 @@ class FilledTorus(ThickTorusWall):
                 notation should be used, where `[` and `]` denote inclusion, whereas `(` and `)` denote exclusion,
                 e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full torus.
             name (str, optional): Name of the filled torus. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the torus. The anchor is the center of the major circle.
         """
         n_thick = int(r_minor / dl) + 1
@@ -695,13 +696,13 @@ class SphereSurface(Geometry):
     """
 
     def __init__(self, r: float, dl: float, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r (float): Sphere radius
             dl (float): Particle spacing
             name (str, optional): Geometry name
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the torus. The anchor is the sphere center.
         """
         super().__init__(name=name or f'SphereSurface {self.get_counter()}', dimension=3)
@@ -844,14 +845,14 @@ class ThickSphere(Geometry):
     """
 
     def __init__(self, r_out: float, r_in: float, dl: float, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r_out (float): Outer radius of the spherical shell.
             r_in (float): Inner radius of the spherical shell.
             dl (float): Spacing between points in the grid.
             name (str, optional): Name of the thick sphere. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the torus. The anchor is the sphere center.
         """
         super().__init__(name=name or f'ThickSphere {self.get_counter()}', dimension=3)
@@ -875,13 +876,13 @@ class FilledSphere(ThickSphere):
     """
 
     def __init__(self, r: float, dl: float, name=None,
-                 anchor: Tuple[float, float, float] | List[float, float, float] = (0, 0, 0)):
+                 anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r (float): Radius of the filled sphere.
             dl (float): Spacing between points in the grid.
             name (str, optional): Name of the filled sphere. Defaults to None.
-            anchor (Tuple[float, float, float] | List[float, float, float]): The anchor coordinate
+            anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the torus. The anchor is the sphere center.
         """
         super().__init__(

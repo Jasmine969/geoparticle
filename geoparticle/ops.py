@@ -7,7 +7,7 @@ stacking, and clipping.
 from __future__ import annotations
 import numpy as np
 from .base import Geometry
-from typing import Iterable, Tuple, List
+from typing import Sequence
 
 
 class Shift(Geometry):
@@ -65,8 +65,8 @@ class Rotate(Geometry):
 
     def __init__(self, geo: Geometry,
                  angle_deg: float, axis_direction: str | None = None,
-                 axis_point1: Iterable[float] | None = None,
-                 axis_point2: Iterable[float] | None = None,
+                 axis_point1: Sequence[float] | None = None,
+                 axis_point2: Sequence[float] | None = None,
                  name=None):
         """
         Initialize a Rotate object that rotates a geometry around a specified axis.
@@ -78,8 +78,8 @@ class Rotate(Geometry):
             geo (Geometry): The source geometry to rotate.
             angle_deg (float): Rotation angle in degrees.
             axis_direction (str | None): Principal axis ('x', 'y', or 'z').
-            axis_point1 (Iterable[float] | None): First point defining the custom axis.
-            axis_point2 (Iterable[float] | None): Second point defining the custom axis.
+            axis_point1 (Sequence[float] | None): First point defining the custom axis.
+            axis_point2 (Sequence[float] | None): Second point defining the custom axis.
 
         Raises:
             ValueError: If invalid axis parameters are provided.
@@ -95,12 +95,12 @@ class Union(Geometry):
     Shortest import: `from geoparticle import Union`
     """
 
-    def __init__(self, geometries: List[Geometry, ...] | Tuple[Geometry, ...], name=None):
+    def __init__(self, geometries: Sequence[Geometry], name=None):
         """
         Initialize a Union object that concatenates multiple geometries.
         Users had better ensure no overlapping (too close) points among the geometries.
         Args:
-            geometries (list[Geometry, ...] | tuple[Geometry, ...]): List of Geometry objects to concatenate.
+            geometries (Sequence[Geometry]): Sequence of Geometry objects to concatenate.
             name (str, optional): Name of the resulting geometry. Defaults to None.
         """
         super().__init__(name=name or f'Union {self.get_counter()}')
@@ -148,13 +148,13 @@ class Intersect(Geometry):
     Shortest import: `from geoparticle import Intersect`
     """
 
-    def __init__(self, geometries: Tuple[Geometry, ...] | List[Geometry, ...],
+    def __init__(self, geometries: Sequence[Geometry],
                  rmax: float = 1e-5, name=None):
         """
         Initialize an Intersect object that computes the intersection of multiple geometries.
 
         Args:
-            geometries (Tuple[Geometry, ...] | List[Geometry, ...]): Geometries to intersect.
+            geometries (Sequence[Geometry]): Geometries to intersect.
             rmax (float, optional): Maximum distance for intersection. Defaults to 1e-5.
             name (str, optional): Name of the resulting geometry. Defaults to None.
         """
@@ -204,8 +204,8 @@ class Clip(Geometry):
             *,
             keep: str,
             plane_name: str | None = None,
-            plane_normal: list[float] | tuple[float, float, float] | np.ndarray | None = None,
-            plane_point: list[float] | tuple[float, float, float] | np.ndarray | None = None,
+            plane_normal: Sequence[float] | None = None,
+            plane_point: Sequence[float] | None = None,
             name=None,
     ):
         """
@@ -219,8 +219,8 @@ class Clip(Geometry):
             geo (Geometry): The source geometry to clip.
             keep (str): Side to keep ('positive' or 'negative').
             plane_name (str, optional): Named plane ('XOY', 'XOZ', 'YOZ'). Defaults to None.
-            plane_normal (array-like, optional): Normal vector of the plane. Defaults to None.
-            plane_point (array-like, optional): A point on the plane. Defaults to None.
+            plane_normal (Sequence[float], optional): Normal vector of the plane. Defaults to None.
+            plane_point (Sequence[float], optional): A point on the plane. Defaults to None.
             name (str, optional): Name of the resulting geometry. Defaults to None.
 
         Raises:
