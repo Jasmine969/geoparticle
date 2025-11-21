@@ -5,7 +5,7 @@ from .ops import *
 from .shapes import *
 from .utils import n_per_ring
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 __author__ = 'Hong Zhu'
 __all__ = [
     'Geometry',
@@ -23,8 +23,9 @@ __all__ = [
     'SymmLines',
     'Arc',
     'Circle',
-    'FilledCircle',
+    'ThickArc',
     'ThickRing',
+    'FilledCircle',
     'ConcentricArc',
     'Rectangle',
     'ThickRectangle',

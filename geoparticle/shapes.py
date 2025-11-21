@@ -109,7 +109,7 @@ class Arc(Geometry):
 
 class ConcentricArc(Geometry):
     """
-    Two concentric arcs.
+    Two concentric arcs. Can be used to create a 2D torus section.
 
     Shortest import: `from geoparticle import ConcentricArc`
     """
@@ -129,7 +129,7 @@ class ConcentricArc(Geometry):
                 to determine the absolute position of the arc. The anchor is the arc center.
             name (str, optional): Name of the torus. Defaults to None.
         """
-        super().__init__(name=name or f'Torus2D {self.get_counter()}', dimension=2)
+        super().__init__(name=name or f'ConcentricArc {self.get_counter()}', dimension=2)
         outer = Arc(r_out, phi_range, 'XOZ', dl)
         inner = Arc(r_in, phi_range, 'XOZ', dl)
         me = Union((inner, outer))
@@ -163,6 +163,93 @@ class Circle(Arc):
                          anchor=anchor)
 
 
+class ThickArc(Geometry):
+    """
+    2D thick arc.
+
+    Shortest import: `from geoparticle import ThickArc`
+    """
+
+    def __init__(self, r_out: float, r_in: float, dl: float, phi_range: str, plane: str = 'XOY',
+                 name=None, anchor: Sequence[float] = (0, 0, 0)):
+        """
+        Args:
+            r_out (float): Outer radius.
+            r_in (float): Inner radius.
+            dl (float): Spacing between points along the arcs.
+            plane (str, optional): Plane in which the torus lies. Defaults to 'XOZ'.
+            phi_range (str, optional): Angular range of the torus in degrees. Defaults to '[180,270)'. Interval
+                notation should be used, where `[` and `]` denote inclusion, whereas `(` and `)` denote exclusion,
+                e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full circle.
+            name (str, optional): Name of the torus. Defaults to None.
+            anchor (Sequence[float]): The anchor coordinate
+                to determine the absolute position of the arc. The anchor is the arc center.
+        """
+        super().__init__(name=name or f'ThickArc {self.get_counter()}', dimension=2)
+        n_layers = int((r_out - r_in) / dl) + 1
+        self.r_in = r_in
+        self.r_out = r_in + (n_layers - 1) * dl
+        _check_size_change(r_out, self.r_out, self.name, 'r_out')
+        layers = []
+        for i in range(n_layers):
+            r_layer = r_in + i * dl
+            layer = Arc(r_layer, phi_range, 'XOZ', dl)
+            layers.append(layer)
+        me = Union(layers)
+        self.set_coord(*_transform_coordinate(me.xs, me.ys, me.zs, plane=plane))
+        self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
+
+
+class ThickRing(ThickArc):
+    """
+    2D thick ring (full circle).
+
+    Shortest import: `from geoparticle import ThickRing`
+    """
+
+    def __init__(self, r_out: float, r_in: float, dl: float, plane: str = 'XOY', name=None,
+                 anchor: Sequence[float] = (0, 0, 0)):
+        """
+        Initialize a ThickRing object.
+
+        Args:
+            r_out (float): Outer radius of the ring.
+            r_in (float): Inner radius of the ring.
+            dl (float): Spacing between points along the ring.
+            plane (str, optional): Plane in which the ring lies. Defaults to 'XOY'.
+            name (str, optional): Name of the thick ring. Defaults to None.
+            anchor (Sequence[float]): The anchor coordinate
+                to determine the absolute position of the ring. The anchor is the ring center.
+        """
+        super().__init__(r_out, r_in, dl, phi_range='[0,360)', plane=plane,
+                         name=name or f'ThickRing {self.get_counter()}',
+                         anchor=anchor)
+
+
+class FilledCircle(ThickRing):
+    """
+    2D filled circle (ring with r_in=0).
+
+    Shortest import: `from geoparticle import FilledCircle`
+    """
+
+    def __init__(self, r: float, dl: float, plane: str = 'XOY', name=None,
+                 anchor: Sequence[float] = (0, 0, 0)):
+        """
+        Initialize a FilledCircle object.
+
+        Args:
+            r (float): Radius of the circle.
+            dl (float): Spacing between points within the circle.
+            plane (str, optional): Plane in which the circle lies. Defaults to 'XOY'.
+            name (str, optional): Name of the filled circle. Defaults to None.
+            anchor (Sequence[float]): The anchor coordinate
+                to determine the absolute position of the circle. The anchor is the circle center.
+        """
+        super().__init__(r, 0, dl, plane=plane, anchor=anchor,
+                         name=name or f'FilledCircle {self.get_counter()}')
+
+
 class Rectangle(Geometry):
     """
     2D rectangle boundary (inner dimensions).
@@ -170,16 +257,16 @@ class Rectangle(Geometry):
     Shortest import: `from geoparticle import Rectangle`
     """
 
-    def __init__(self, length: float, width: float, axis: str, dl: float, name=None,
-                 anchor: Sequence[float] = (0, 0, 0)):
+    def __init__(self, length: float, width: float, dl: float, plane: str = 'XOY',
+                 name=None, anchor: Sequence[float] = (0, 0, 0)):
         """
         Initialize a Rectangle object.
 
         Args:
             length (float): Length of the rectangle.
             width (float): Width of the rectangle.
-            axis (str): Axis orthogonal to the rectangle ('x', 'y', or 'z').
             dl (float): Spacing between points along the rectangle boundary.
+            plane (str): Plane in which the rectangle lies ('XOY', 'YOZ', or 'XOZ'). Defaults to 'XOY'.
             name (str, optional): Name of the rectangle. Defaults to None.
             anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the rectangle. The anchor is the vertex
@@ -202,7 +289,7 @@ class Rectangle(Geometry):
         zs = np.r_[z_bot, z_left, z_top, z_right]
         xs = np.r_[x_bot, x_left, x_top, x_right]
         ys = np.zeros_like(xs)
-        self.set_coord(*_transform_coordinate(xs, ys, zs, axis=axis))
+        self.set_coord(*_transform_coordinate(xs, ys, zs, plane=plane))
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
         self.check_overlap()
 
@@ -215,8 +302,8 @@ class ThickRectangle(Geometry):
     """
 
     def __init__(self, length: float, width: float, n_thick: int,
-                 axis: str, dl: float, name=None,
-                 anchor: Sequence[float] = (0, 0, 0)):
+                 dl: float, plane: str = 'XOY',
+                 name=None, anchor: Sequence[float] = (0, 0, 0)):
         """
         Initialize a ThickRectangle object.
 
@@ -224,8 +311,8 @@ class ThickRectangle(Geometry):
             length (float): Inner length of the rectangle.
             width (float): Inner width of the rectangle.
             n_thick (int): Number of thickness layers.
-            axis (str): Axis orthogonal to the rectangle ('x', 'y', or 'z').
             dl (float): Spacing between points along the rectangle boundary.
+            plane (str): Plane in which the rectangle lies ('XOY', 'YOZ', or 'XOZ'). Defaults to 'XOY'.
             name (str, optional): Name of the thick rectangle. Defaults to None.
             anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the thick rectangle. The anchor is the vertex
@@ -239,7 +326,7 @@ class ThickRectangle(Geometry):
             layer = Rectangle(L, W, 'y', dl).shift(x=-i * dl, z=-i * dl)
             layers.append(layer)
         me = Union(layers)
-        self.set_coord(*_transform_coordinate(me.xs, me.ys, me.zs, axis=axis))
+        self.set_coord(*_transform_coordinate(me.xs, me.ys, me.zs, plane=plane))
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
         self.check_overlap()
 
@@ -251,16 +338,16 @@ class FilledRectangle(Geometry):
     Shortest import: `from geoparticle import FilledRectangle`
     """
 
-    def __init__(self, length: float, width: float, axis: str, dl: float, name=None,
-                 anchor: Sequence[float] = (0, 0, 0)):
+    def __init__(self, length: float, width: float, dl: float, plane: str = 'XOY',
+                 name=None, anchor: Sequence[float] = (0, 0, 0)):
         """
         Initialize a FilledRectangle object.
 
         Args:
             length (float): Length of the rectangle.
             width (float): Width of the rectangle.
-            axis (str): Axis orthogonal to the rectangle ('x', 'y', or 'z').
             dl (float): Spacing between points within the rectangle.
+            plane (str): Plane in which the rectangle lies ('XOY', 'YOZ', or 'XOZ'). Defaults to 'XOY'.
             name (str, optional): Name of the filled rectangle. Defaults to None.
             anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the rectangle. The anchor is the vertex
@@ -275,97 +362,9 @@ class FilledRectangle(Geometry):
         Z, X = np.meshgrid(z, x, indexing='xy')
         zs, xs = Z.ravel(), X.ravel()
         ys = np.zeros_like(xs)
-        self.set_coord(*_transform_coordinate(xs, ys, zs, axis=axis))
+        self.set_coord(*_transform_coordinate(xs, ys, zs, plane=plane))
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
         self.check_overlap()
-
-
-class ThickRing(Geometry):
-    """
-    2D ring region between inner and outer circles. Inner/outer rings can be included or excluded.
-
-    Shortest import: `from geoparticle import ThickRing`
-    """
-
-    def __init__(self, r_out: float, r_in: float, dl: float,
-                 incl_inner: bool = True, incl_outer: bool = True,
-                 axis: str = 'y', adjust_dl: bool = False,
-                 equal_size_per_circle: bool = False, name=None,
-                 anchor: Sequence[float] = (0, 0, 0)):
-        """
-        Args:
-            r_out (float): Outer radius of the ring.
-            r_in (float): Inner radius of the ring.
-            dl (float): Spacing between points along the ring.
-            incl_inner (bool): Whether to include the inner circle.
-            incl_outer (bool): Whether to include the outer circle.
-            axis (str, optional): Axis orthogonal to the ring. Defaults to 'y'.
-            adjust_dl (bool, optional): Whether to adjust spacing for the inner circle. Defaults to False.
-            equal_size_per_circle (bool, optional): Whether to use equal point count per circle. Defaults to False.
-            name (str, optional): Name of the thick ring. Defaults to None.
-            anchor (Sequence[float]): The anchor coordinate
-                to determine the absolute position of the ring. The anchor is the ring center.
-        """
-        super().__init__(name=name or f'ThickRing {self.get_counter()}', dimension=2)
-        if r_out < r_in:
-            raise ValueError('r_out must be >= r_in')
-        self.dl = float(dl)
-        n_inner = n_per_ring(r_in, self.dl) if r_in > 0 else 1
-        if adjust_dl and r_in > 0:
-            self.dl = float(spacing_ring(r_in, n_inner))
-        n_radial = int(round((r_out - r_in) / self.dl))
-        self.r_out = r_in + n_radial * self.dl
-        _check_size_change(r_out, self.r_out, self.name, 'r_out')
-        rs = np.arange(0, n_radial + 1) * self.dl + r_in
-        if equal_size_per_circle and r_in > 0:
-            n_per_rings = np.full_like(rs, n_inner, dtype=int)
-        else:
-            n_per_rings = n_per_ring(rs, self.dl)
-        if not incl_inner and rs.size > 0:
-            rs, n_per_rings = rs[1:], n_per_rings[1:]
-        if not incl_outer and rs.size > 0:
-            rs, n_per_rings = rs[:-1], n_per_rings[:-1]
-        xs, zs = [], []
-        if isinstance(n_per_rings, int):
-            n_per_rings = np.array([n_per_rings])
-        for r, n in zip(rs, n_per_rings):
-            x, z = _ring_xy(int(n), float(r))  # x=cos, z=sin in default plane, will be remapped
-            xs.append(x)
-            zs.append(z)
-        xs = np.asarray(np.hstack(xs)) if xs else np.array([], dtype=float)
-        zs = np.asarray(np.hstack(zs)) if zs else np.array([], dtype=float)
-        ys = np.zeros_like(xs)
-        self.set_coord(*_transform_coordinate(xs, ys, zs, axis=axis))
-        self.rs = rs
-        self.n_per_rings = n_per_rings
-        self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
-        self.check_overlap()
-
-
-class FilledCircle(ThickRing):
-    """
-    2D filled circle (ring with r_in=0 and inner/outer included).
-
-    Shortest import: `from geoparticle import FilledCircle`
-    """
-
-    def __init__(self, r: float, dl: float, axis: str = 'y', name=None,
-                 anchor: Sequence[float] = (0, 0, 0)):
-        """
-        Initialize a FilledCircle object.
-
-        Args:
-            r (float): Radius of the circle.
-            dl (float): Spacing between points within the circle.
-            axis (str, optional): Axis orthogonal to the circle. Defaults to 'y'.
-            name (str, optional): Name of the filled circle. Defaults to None.
-            anchor (Sequence[float]): The anchor coordinate
-                to determine the absolute position of the circle. The anchor is the circle center.
-        """
-        super().__init__(r_out=r, r_in=0.0, dl=dl, incl_inner=True, incl_outer=True,
-                         axis=axis, adjust_dl=False, equal_size_per_circle=False,
-                         name=name or f'FilledCircle {self.get_counter()}',
-                         anchor=anchor)
 
 
 class Block(Geometry):
