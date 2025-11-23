@@ -10,21 +10,25 @@ dl = 0.2
 fig0 = plt.figure(figsize=(12, 6))
 # line
 ax01 = fig0.add_subplot(121)
-line = gp.Line(2, 'x', dl, 'line').rotate(-30, 'z')
+line = gp.Line(2, 'x', dl, name='line').rotate(-30, 'z')
 line.plot(ax01)
-symm_lines = gp.SymmLines(2, 'z', 0.3, dl, 'symm_lines').shift(y=-2)
+
+symm_lines = gp.SymmLines(2, 'x', 'XOZ', 0.3, dl, name='symm_lines').shift(y=-2)
 symm_lines.plot(ax01)
+
 ax01.set_title('Lines')
 ax01.axis('equal')
+
 # curves
 ax02 = fig0.add_subplot(122)
-arc = gp.Arc(1.6, '[90, 180)', 'XOY', dl, 'arc')
+arc = gp.Arc(1.6, '[90, 180)', dl, name='arc')
 arc.plot(ax02)
 
-circle = gp.Circle(1.5, 'XOY', dl, 'circle').shift(x=2)
+circle = gp.Circle(1.5, dl, name='circle').shift(x=2)
 circle.plot(ax02)
 
-conc_arc = gp.ConcentricArc(0.4, 1.2, dl, plane='XOY', phi_range='[0,270)').shift(x=-1, y=4)
+conc_arc = gp.ConcentricArc(1.2, 0.6, dl, plane='XOY', phi_range='[0,270)',
+                            name='conc_arc').shift(x=-1, y=4)
 conc_arc.plot(ax02)
 
 ax02.set_title('Curves')
@@ -34,22 +38,25 @@ ax02.axis('equal')
 fig1 = plt.figure(figsize=(12, 6))
 ax11 = fig1.add_subplot(121)
 # rectangles
-rectangle = gp.Rectangle(4, 1.2, 'z', dl).shift(y=3)
+rectangle = gp.Rectangle(4, 1.2, dl, name='rect').shift(y=3)
 rectangle.plot(ax11)
-filled_rectangle = gp.FilledRectangle(1.7, 2, 'z', dl)
+filled_rectangle = gp.FilledRectangle(1.7, 2, dl)
 filled_rectangle.plot(ax11)
-thick_rectangle = gp.ThickRectangle(1.7, 2, 2, 'z', dl).shift(x=2.5)
+thick_rectangle = gp.ThickRectangle(1.7, 2, 2, dl).shift(x=2.5)
 thick_rectangle.plot(ax11)
 ax11.set_title('Rectangles')
 ax11.axis('equal')
 # circles
 ax12 = fig1.add_subplot(122)
-circle = gp.Circle(1.5, 'XOY', dl, 'circle').shift(x=3, y=-1)
+circle = gp.Circle(1.5, dl, name='circle').shift(x=3, y=-1)
 circle.plot(ax12)
-thick_ring = gp.ThickRing(1.6, 1, dl, incl_inner=True, incl_outer=True, axis='z').shift(y=1)
+
+thick_ring = gp.ThickRing(1.6, 1, dl).shift(y=1)
 thick_ring.plot(ax12)
-filled_circle = gp.FilledCircle(1, dl, axis='z').shift(y=-2)
+
+filled_circle = gp.FilledCircle(1, dl).shift(y=-2)
 filled_circle.plot(ax12)
+
 ax12.set_title('Circles')
 ax12.axis('equal')
 
@@ -69,11 +76,12 @@ ax21.view_init(elev=33, azim=-76, roll=3)
 ax22 = fig2.add_subplot(222, projection='3d')
 tube = gp.CylinderSide(2, 10, dl, 'z')
 thick_tube = gp.ThickCylinderSide(2, 1.5, 10, dl, 'z').shift(x=5)
-water_column = gp.FilledCylinder(1.8, 10, dl, 'z').shift(x=10)
+water_column = gp.FilledCylinder(1.8, 10, dl, 'z', name='column', anchor=(10, 0, 0))
 tube.plot(ax22)
 thick_tube.plot(ax22, c=thick_tube.radius)
 water_column.plot(ax22, c=water_column.radius)
 ax22.set_title('Hollow and filled cylinders')
+
 # torus
 ax23 = fig2.add_subplot(223, projection='3d')
 torus_surface = gp.TorusSurface(2, 5, dl, plane='XOY', phi_range='[0,150)')

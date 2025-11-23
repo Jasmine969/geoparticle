@@ -12,15 +12,15 @@ wall = gp.ThickRectangle(
     length=l_box,  # inner length
     width=h_box,  # inner height
     n_thick=n_thick,  # number of particle layers
-    axis='z',  # axis normal to the rectangle plane
     dl=dl,  # particle spacing
+    plane='XOY',  # plane of the rectangle, 'XOY' is the default
     name='wall'  # name of the geometry for reference
 )
 water = gp.FilledRectangle(
-    length=l_water, width=h_water, axis='z', dl=dl, name='water'
+    length=l_water, width=h_water, dl=dl, name='water'
 ).shift(x=dl, y=dl)
 gas = gp.FilledRectangle(
-    l_box - 2 * dl, h_box - 2 * dl, 'z', dl, name='gas'
+    l_box - 2 * dl, h_box - 2 * dl, dl, name='gas'
 ).shift(x=dl, y=dl)
 gas = gas.subtract(
     water,  # which geometry to subtract

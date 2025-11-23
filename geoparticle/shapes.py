@@ -29,11 +29,11 @@ class Line(Geometry):
             name (str, optional): Name of the line. Defaults to None.
         """
         super().__init__(name=name or f'Line {self.get_counter()}', dimension=2)
-        ys = _arange0_quantized(length, dl)
-        self.length = float(ys[-1])
+        zs = _arange0_quantized(length, dl)
+        self.length = float(zs[-1])
         _check_size_change(length, self.length, self.name, 'length')
-        xs = np.zeros_like(ys)
-        zs = np.zeros_like(ys)
+        xs = np.zeros_like(zs)
+        ys = np.zeros_like(zs)
         self.set_coord(*_transform_coordinate(xs, ys, zs, axis=direction))
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
         self.check_overlap()
@@ -80,7 +80,7 @@ class Arc(Geometry):
     Shortest import: `from geoparticle import Arc`
     """
 
-    def __init__(self, r: float, phi_range: str, plane: str, dl: float, name=None,
+    def __init__(self, r: float, phi_range: str, dl: float, plane: str = 'XOY', name=None,
                  anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
@@ -88,19 +88,19 @@ class Arc(Geometry):
             phi_range (str, optional): Angular range of the torus in degrees. Defaults to '[180,270)'. Interval
                 notation should be used, where `[` and `]` denote inclusion, whereas `(` and `)` denote exclusion,
                 e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full circle.
+            dl (float): Spacing between points along the arc.
             plane (str): Plane in which the arc lies ('XOY', 'YOZ', or 'XOZ').
+            name (str, optional): Name of the arc. Defaults to None.
             anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the arc. The anchor is the arc center.
-            dl (float): Spacing between points along the arc.
-            name (str, optional): Name of the arc. Defaults to None.
         """
         super().__init__(name=name or f'Arc {self.get_counter()}', dimension=2)
         a_deg, b_deg, incl_min, incl_max, total_deg = _parse_interval_deg(phi_range)
         self.phi_tot_deg = total_deg
         phis = _discretize_arc_by_dl(r, dl, a_deg, b_deg, incl_min, incl_max)
-        zs = r * np.cos(phis)
-        xs = r * np.sin(phis)
-        ys = np.zeros_like(xs)
+        xs = r * np.cos(phis)
+        ys = r * np.sin(phis)
+        zs = np.zeros_like(xs)
         self.set_coord(*_transform_coordinate(xs, ys, zs, plane=plane))
         # apply anchor translation if provided
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
@@ -114,14 +114,14 @@ class ConcentricArc(Geometry):
     Shortest import: `from geoparticle import ConcentricArc`
     """
 
-    def __init__(self, r_out: float, r_in: float, dl: float, plane='XOZ', phi_range='[0,360)', name=None,
-                 anchor: Sequence[float] = (0, 0, 0)):
+    def __init__(self, r_out: float, r_in: float, dl: float, plane: str = 'XOY',
+                 phi_range='[0,360)', name=None, anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r_out (float): Outer radius.
             r_in (float): Inner radius.
             dl (float): Spacing between points along the arcs.
-            plane (str, optional): Plane in which the torus lies. Defaults to 'XOZ'.
+            plane (str, optional): Plane in which the torus lies. Defaults to 'XOY'.
             phi_range (str, optional): Angular range of the torus in degrees. Defaults to '[180,270)'. Interval
                 notation should be used, where `[` and `]` denote inclusion, whereas `(` and `)` denote exclusion,
                 e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full circle.
@@ -132,8 +132,8 @@ class ConcentricArc(Geometry):
         super().__init__(name=name or f'ConcentricArc {self.get_counter()}', dimension=2)
         if r_in >= r_out:
             raise ValueError('r_in must be smaller than r_out')
-        outer = Arc(r_out, phi_range, 'XOZ', dl)
-        inner = Arc(r_in, phi_range, 'XOZ', dl)
+        outer = Arc(r_out, phi_range, dl, plane)
+        inner = Arc(r_in, phi_range, dl, plane)
         me = Union((inner, outer))
         self.set_coord(*_transform_coordinate(me.xs, me.ys, me.zs, plane=plane))
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
@@ -147,7 +147,7 @@ class Circle(Arc):
     Shortest import: `from geoparticle import Circle`
     """
 
-    def __init__(self, r: float, plane: str, dl: float, name=None,
+    def __init__(self, r: float,  dl: float, plane: str='XOY',name=None,
                  anchor: Sequence[float] = (0, 0, 0)):
         """
         Initialize a Circle object.
@@ -160,7 +160,7 @@ class Circle(Arc):
             anchor (Sequence[float]): The anchor coordinate
                 to determine the absolute position of the arc. The anchor is the circle center.
         """
-        super().__init__(r, '[0,360)', plane, dl,
+        super().__init__(r, '[0,360)', dl, plane,
                          name=name or f'Circle {self.get_counter()}',
                          anchor=anchor)
 
@@ -179,7 +179,7 @@ class ThickArc(Geometry):
             r_out (float): Outer radius.
             r_in (float): Inner radius.
             dl (float): Spacing between points along the arcs.
-            plane (str, optional): Plane in which the torus lies. Defaults to 'XOZ'.
+            plane (str, optional): Plane in which the torus lies. Defaults to 'XOY'.
             phi_range (str, optional): Angular range of the torus in degrees. Defaults to '[180,270)'. Interval
                 notation should be used, where `[` and `]` denote inclusion, whereas `(` and `)` denote exclusion,
                 e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full circle.
@@ -197,7 +197,7 @@ class ThickArc(Geometry):
         layers = []
         for i in range(n_layers):
             r_layer = r_in + i * dl
-            layer = Arc(r_layer, phi_range, 'XOZ', dl)
+            layer = Arc(r_layer, phi_range, dl, 'XOY')
             layers.append(layer)
         me = Union(layers)
         self.set_coord(*_transform_coordinate(me.xs, me.ys, me.zs, plane=plane))
@@ -277,22 +277,22 @@ class Rectangle(Geometry):
                 with the smallest (x,y,z) coordinates.
         """
         super().__init__(name=name or f'Rectangle {self.get_counter()}', dimension=2)
-        z_bot = _arange0_quantized(length, dl)
-        x_left = _arange0_quantized(width - dl, dl) + dl
-        self.length, self.width = float(z_bot[-1]), float(x_left[-1])
+        x_bot = _arange0_quantized(length, dl)
+        y_left = _arange0_quantized(width - dl, dl) + dl
+        self.length, self.width = float(x_bot[-1]), float(y_left[-1])
         _check_size_change(length, self.length, self.name, 'length')
         _check_size_change(width, self.width, self.name, 'width')
         # Build boundary without duplicating corners
-        x_left = x_left[:-1]
-        z_left = np.full_like(x_left, 0)
-        x_right = np.copy(x_left)
-        z_right = np.full_like(x_right, self.length)
-        x_bot = np.full_like(z_bot, 0)
-        z_top = np.copy(z_bot)
-        x_top = np.full_like(z_top, self.width)
-        zs = np.r_[z_bot, z_left, z_top, z_right]
+        y_left = y_left[:-1]
+        x_left = np.full_like(y_left, 0)
+        y_right = np.copy(y_left)
+        x_right = np.full_like(y_right, self.length)
+        y_bot = np.full_like(x_bot, 0)
+        x_top = np.copy(x_bot)
+        y_top = np.full_like(x_top, self.width)
         xs = np.r_[x_bot, x_left, x_top, x_right]
-        ys = np.zeros_like(xs)
+        ys = np.r_[y_bot, y_left, y_top, y_right]
+        zs = np.zeros_like(xs)
         self.set_coord(*_transform_coordinate(xs, ys, zs, plane=plane))
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
         self.check_overlap()
@@ -327,10 +327,9 @@ class ThickRectangle(Geometry):
         for i in range(n_thick):
             L = length + 2 * i * dl
             W = width + 2 * i * dl
-            layer = Rectangle(L, W, 'y', dl).shift(x=-i * dl, z=-i * dl)
+            layer = Rectangle(L, W, dl, plane).shift(x=-i * dl, y=-i * dl)
             layers.append(layer)
-        me = Union(layers)
-        self.set_coord(*_transform_coordinate(me.xs, me.ys, me.zs, plane=plane))
+        self.load_from(Union(layers))
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
         self.check_overlap()
 
@@ -358,14 +357,14 @@ class FilledRectangle(Geometry):
                 with the smallest (x,y,z) coordinates.
         """
         super().__init__(name=name or f'FilledRectangle {self.get_counter()}', dimension=2)
-        z = _arange0_quantized(length, dl)
-        x = _arange0_quantized(width, dl)
-        self.length, self.width = float(z[-1]), float(x[-1])
+        x = _arange0_quantized(length, dl)
+        y = _arange0_quantized(width, dl)
+        self.length, self.width = float(x[-1]), float(y[-1])
         _check_size_change(length, self.length, self.name, 'length')
         _check_size_change(width, self.width, self.name, 'width')
-        Z, X = np.meshgrid(z, x, indexing='xy')
-        zs, xs = Z.ravel(), X.ravel()
-        ys = np.zeros_like(xs)
+        X, Y = np.meshgrid(x, y, indexing='xy')
+        xs, ys = X.ravel(), Y.ravel()
+        zs = np.zeros_like(xs)
         self.set_coord(*_transform_coordinate(xs, ys, zs, plane=plane))
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
         self.check_overlap()
@@ -394,7 +393,7 @@ class Block(Geometry):
                 with the smallest (x,y,z) coordinates.
         """
         super().__init__(name=name or f'Block {self.get_counter()}', dimension=3)
-        layer = FilledRectangle(length, width, 'z', dl)
+        layer = FilledRectangle(length, width, dl, 'XOY')
         n_height = int(height / dl) + 1
         self.height = (n_height - 1) * dl
         _check_size_change(height, self.height, self.name, 'height')
@@ -410,8 +409,8 @@ class ThickBlockWall(Geometry):
     Shortest import: `from geoparticle import ThickBlockWall`
     """
 
-    def __init__(self, length: float, width: float, height: float, n_thick: int, dl: float, name=None,
-                 anchor: Sequence[float] = (0, 0, 0)):
+    def __init__(self, length: float, width: float, height: float, n_thick: int, dl: float,
+                 name=None, anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             length (float): Inner length of the box.
@@ -425,10 +424,10 @@ class ThickBlockWall(Geometry):
                 with the smallest (x,y,z) coordinates of the innermost layer.
         """
         super().__init__(name=name or f'ThickBlockWall {self.get_counter()}', dimension=3)
-        side_layer = ThickRectangle(length, width, n_thick, 'z', dl)
+        side_layer = ThickRectangle(length, width, n_thick, dl, 'XOY')
         n_height = int(height / dl) + 1
         side = Stack(side_layer, 'z', n_height + n_thick, dl, dimension=3).shift(z=-(n_thick - 1) * dl)
-        lid_layer = FilledRectangle(length - 2 * dl, width - 2 * dl, 'z', dl).shift(x=dl, y=dl)
+        lid_layer = FilledRectangle(length - 2 * dl, width - 2 * dl, dl, 'XOY').shift(x=dl, y=dl)
         lid_lower = Stack(lid_layer, 'z', -n_thick, dl, dimension=3)
         z_mid = (n_height - 1) * dl / 2
         lid_upper = lid_lower.mirror('XOY', z_mid)
@@ -462,14 +461,14 @@ class CylinderSide(Geometry):
         self.r = float(r)
         self.radius = float(r)
         self.n_axis = int(self.l_axis / dl) + 1
-        y = np.arange(0, self.n_axis) * dl
-        self.l_axis = float(y[-1])
+        z = np.arange(0, self.n_axis) * dl
+        self.l_axis = float(z[-1])
         _check_size_change(l_axis, self.l_axis, self.name, 'l_axis')
         self.n_ring = int(n_per_ring(self.radius, dl))
-        z_ring, x_ring = _ring_xy(self.n_ring, self.radius)
-        zs = np.tile(z_ring, self.n_axis)
+        x_ring, y_ring = _ring_xy(self.n_ring, self.radius)
         xs = np.tile(x_ring, self.n_axis)
-        ys = np.repeat(y, self.n_ring)
+        ys = np.tile(y_ring, self.n_axis)
+        zs = np.repeat(z, self.n_ring)
         self.set_coord(*_transform_coordinate(xs, ys, zs, axis=axis))
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
         self.check_overlap()
@@ -493,7 +492,7 @@ class ThickCylinderSide(Geometry):
     """
 
     def __init__(self, r_out, r_in, l_axis: float, dl: float,
-                 axis: str = 'y', name=None,
+                 axis: str = 'z', name=None,
                  anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
@@ -512,8 +511,8 @@ class ThickCylinderSide(Geometry):
         self.l_axis = (n_axis - 1) * dl
         _check_size_change(l_axis, self.l_axis, self.name, 'l_axis')
         layer = ThickRing(r_out, r_in, dl)
-        me = Stack(layer, 'y', n_axis, dl, dimension=3)
-        self.radius = np.sqrt(me.xs ** 2 + me.zs ** 2)
+        me = Stack(layer, 'z', n_axis, dl, dimension=3)
+        self.radius = np.sqrt(me.xs ** 2 + me.ys ** 2)
         self.set_coord(*_transform_coordinate(me.xs, me.ys, me.zs, axis=axis))
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
         self.check_overlap()
@@ -540,12 +539,12 @@ class FilledCylinder(Geometry):
                 bottom/left/back center of the cylinder.
         """
         super().__init__(name=name or f'FilledCylinder {self.get_counter()}', dimension=3)
-        radial_layer = FilledCircle(r, dl, 'y')
+        radial_layer = FilledCircle(r, dl)
         n_axis = int(l_axis / dl) + 1
         self.l_axis = (n_axis - 1) * dl
         _check_size_change(l_axis, self.l_axis, self.name, 'l_axis')
-        me = Stack(radial_layer, 'y', n_axis, dl, dimension=3)
-        self.radius = np.sqrt(me.xs ** 2 + me.zs ** 2)
+        me = Stack(radial_layer, 'z', n_axis, dl, dimension=3)
+        self.radius = np.sqrt(me.xs ** 2 + me.ys ** 2)
         self.set_coord(*_transform_coordinate(me.xs, me.ys, me.zs, axis=axis))
         self.shift(x=anchor[0], y=anchor[1], z=anchor[2], inplace=True)
         self.check_overlap()
@@ -559,7 +558,7 @@ class TorusSurface(Geometry):
     """
 
     def __init__(self, r_minor: float, r_major: float, dl: float, n_ring: int = None,
-                 plane='XOZ', phi_range='[180,270)', regular_id=False, name=None,
+                 plane='XOY', phi_range='[180,270)', regular_id=False, name=None,
                  anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
@@ -567,7 +566,7 @@ class TorusSurface(Geometry):
             r_major (float): Radius of the torus centerline.
             dl (float): Spacing between points in the grid.
             n_ring (int): Number of points along the tube's cross-section.
-            plane (str, optional): Plane in which the torus lies. Defaults to 'XOZ'.
+            plane (str, optional): Plane in which the torus lies. Defaults to 'XOY'.
             phi_range (str, optional): Angular range of the torus in degrees. Defaults to '[180,270)'. Interval
                 notation should be used, where `[` and `]` denote inclusion, whereas `(` and `)` denote exclusion,
                 e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full torus.
@@ -580,7 +579,7 @@ class TorusSurface(Geometry):
         if not (r_minor < r_major):
             raise ValueError('r_minor must be smaller than r_major')
         if r_minor == 0:
-            self.load_from(Arc(r_major, phi_range, plane, dl))
+            self.load_from(Arc(r_major, phi_range, dl, plane))
             return
         if n_ring is None:
             n_ring = n_per_ring(r_minor, dl)
@@ -608,9 +607,9 @@ class TorusSurface(Geometry):
             all_phi = np.hstack(all_phi) if all_phi else np.array([], dtype=float)
             all_theta = np.hstack(all_theta) if all_theta else np.array([], dtype=float)
 
-        ys = r_minor * np.sin(all_theta)
-        xs = (r_major - r_minor * np.cos(all_theta)) * np.sin(all_phi)
-        zs = (r_major - r_minor * np.cos(all_theta)) * np.cos(all_phi)
+        zs = r_minor * np.sin(all_theta)
+        ys = (r_major - r_minor * np.cos(all_theta)) * np.sin(all_phi)
+        xs = (r_major - r_minor * np.cos(all_theta)) * np.cos(all_phi)
         self.set_coord(*_transform_coordinate(xs, ys, zs, plane=plane))
         self.phi_tot = phi_tot
         self.theta = all_theta
@@ -630,7 +629,7 @@ class ThickTorusWall(Geometry):
     """
 
     def __init__(self, r_in: float, r_major: float, n_thick: int, dl: float,
-                 plane='XOZ', phi_range='[180,270)', name=None,
+                 plane='XOY', phi_range='[180,270)', name=None,
                  anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
@@ -638,7 +637,7 @@ class ThickTorusWall(Geometry):
             n_thick (int): Number of thickness layers.
             r_major (float): Radius of the torus centerline.
             dl (float): Spacing between points in the grid.
-            plane (str, optional): Plane in which the torus lies. Defaults to 'XOZ'.
+            plane (str, optional): Plane in which the torus lies. Defaults to 'XOY'.
             phi_range (str, optional): Angular range of the torus in degrees. Defaults to '[180,270)'. Interval
                 notation should be used, where `[` and `]` denote inclusion, whereas `(` and `)` denote exclusion,
                 e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full torus.
@@ -669,14 +668,14 @@ class FilledTorus(ThickTorusWall):
     """
 
     def __init__(self, r_minor: float, r_major: float, dl: float,
-                 plane='XOZ', phi_range='[180,270)', name=None,
+                 plane='XOY', phi_range='[180,270)', name=None,
                  anchor: Sequence[float] = (0, 0, 0)):
         """
         Args:
             r_minor (float): Outer radius of the torus tube.
             r_major (float): Radius of the torus centerline.
             dl (float): Spacing between points in the grid.
-            plane (str, optional): Plane in which the torus lies. Defaults to 'XOZ'.
+            plane (str, optional): Plane in which the torus lies. Defaults to 'XOY'.
             phi_range (str, optional): Angular range of the torus in degrees. Defaults to '[180,270)'. Interval
                 notation should be used, where `[` and `]` denote inclusion, whereas `(` and `)` denote exclusion,
                 e.g., `[180,270)`, `(0, 90)`, etc. Use `[0,360)` for a full torus.

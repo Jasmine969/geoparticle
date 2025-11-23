@@ -146,6 +146,25 @@ def _discretize_arc_by_dl(r: float, dl: float, a_deg: float,
 
 def _resolve_axis_or_plane(*, axis: str | None = None, plane: str | None = None) -> str:
     """
+    There are three coordinate systems based on the 'right' axis:
+    1. 'x' right, 'y' forward, 'z' up
+        z
+        | y
+        |/
+        O----x
+    2. 'y' right, 'z' forward, 'x' up
+        x
+        | z
+        |/
+        O----y
+    3. 'z' right, 'x' forward, 'y' up
+        y
+        | x
+        |/
+        O----z
+    1D geometries are always constructed along the 'up' axis.
+    2D geometries are always constructed in the horizontal plane defined by the 'right' and 'forward' axes.
+    3D solids of revolution are always constructed around the 'up' axis.
     Resolve the 'up' axis based on the specified axis or plane.
     You must specify the parameter names when calling this function.
     Only one of `axis` or `plane` should be provided.
@@ -176,6 +195,7 @@ def _resolve_axis_or_plane(*, axis: str | None = None, plane: str | None = None)
 def _transform_coordinate(xs: np.ndarray, ys: np.ndarray, zs: np.ndarray,
                           *, axis: str | None = None, plane: str | None = None):
     """
+    The default coordinate system is: 'x' right, 'y' forward, 'z' up
     Transform coordinates to align with the specified axis or plane.
 
     Args:
@@ -189,9 +209,9 @@ def _transform_coordinate(xs: np.ndarray, ys: np.ndarray, zs: np.ndarray,
         tuple[np.ndarray, np.ndarray, np.ndarray]: Transformed coordinates.
     """
     axis_up = _resolve_axis_or_plane(axis=axis, plane=plane)
-    if axis_up == 'z':
+    if axis_up == 'x':
         xs, ys, zs = zs, xs, ys
-    elif axis_up == 'x':
+    elif axis_up == 'y':
         xs, ys, zs = ys, zs, xs
     return xs, ys, zs
 
